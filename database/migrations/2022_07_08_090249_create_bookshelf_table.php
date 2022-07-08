@@ -27,6 +27,8 @@ return new class extends Migration
             ->constrained('books')
             ->onUpdate('cascade')
             ->onDelete('cascade');
+
+            $table->unique(['user_id', 'book_id']);
         });
     }
 

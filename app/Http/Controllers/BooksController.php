@@ -34,7 +34,7 @@ class BooksController extends Controller
 
     public function get_books(int $id = null)
     {
-        if(is_null($id)){
+        if(is_null($id) || !is_int($id)){
             $users = DB::select('select * from books');
         }
         else{
