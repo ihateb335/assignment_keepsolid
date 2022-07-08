@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Http\Request;
+use App\Models\Books;
+use Illuminate\Support\Facades\Hash;
 
 class BooksController extends Controller
 {
@@ -17,9 +19,9 @@ class BooksController extends Controller
         //
     }
 
-    public function drop_book(Request $request)
+    public function drop_book(int $id)
     {
-        return DB::table('books')->delete($request->input('id'));
+        return DB::table('books')->delete($id);
     }
 
     public function add_book(Request $request)
@@ -41,5 +43,22 @@ class BooksController extends Controller
             $users = DB::select("select * from books where id = $id");
         }
         return $users;
+    }
+
+    public function CSV()
+    {
+        $file_name = uniqid() . '_books.csv';
+        $file = fopen($file_name, 'wa');   
+        foreach (Books::get() as $book) {
+            fputcsv($file, [$book->id, $book->title, $book->descr ], separator: ';');
+        }
+        fclose($file);
+        
+        header("Content-Length: " . filesize($file_name));
+        header("Content-Disposition: attachment; filename=".$file_name); 
+        header("Content-Type: application/x-force-download; name=\"".$file_name."\"");
+
+        readfile($file_name);
+        unlink($file_name);
     }
 }

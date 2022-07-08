@@ -16,10 +16,21 @@
 $router->get('/', function () use ($router) {
     return "Test";
 });
-$router->post('/users/registry', 'UsersController@registry');
-$router->post('/users/{id}/add_to_favorite', 'UsersController@add_fav_book');
-$router->post('/users/{id}/remove_from_favorite', 'UsersController@rem_fav_book');
 
-$router->post('/books/add', 'BooksController@add_book');
-$router->delete('/books/drop', 'BooksController@drop_book');
-$router->get('/books[/{id:int}]', 'BooksController@get_books');
+$router->group(['prefix' => 'users/'], function () use ($router) {
+    $router->post('registry', 'UsersController@registry');
+    $router->group(['prefix' => '{id:[0-9]+}/'], function () use ($router) {
+        $router->post('add_to_favorite', 'UsersController@add_fav_book');
+        $router->delete('remove_from_favorite', 'UsersController@rem_fav_book');
+    });
+});
+
+$router->get('/books[/{id:[0-9]+}]', 'BooksController@get_books');
+
+$router->group(['prefix' => 'books/'], function () use ($router) {
+    $router->post('add', 'BooksController@add_book');
+    $router->get('download', 'BooksController@CSV');
+    $router->delete('/{id:[0-9]+}/drop', 'BooksController@drop_book');
+});
+
+

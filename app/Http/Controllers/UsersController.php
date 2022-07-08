@@ -60,5 +60,24 @@ class UsersController extends Controller
         return "Book added to favorites";
     }
 
+    public function rem_fav_book($id, Request $request)
+    {
+        $book_id = $request->input('id');
+        if(is_null($id)){
+            return "User Id is not set";
+        }
+        if(is_null($book_id)){
+            return "Book Id is not set";
+        }
+        if(Users::where('id',$id)->count() == 0){
+            return "There is no user with id = " . $id;
+        }
+        if(Bookshelf::where('book_id',$book_id)->where('user_id', $id)->count() == 0){
+            return "There are no books in user's bookshelf with id = " . $book_id;
+        }
+
+        Bookshelf::where('book_id',$book_id)->where('user_id', $id)->delete();
+        return "Book removed from favorite";
+    }
 
 }
