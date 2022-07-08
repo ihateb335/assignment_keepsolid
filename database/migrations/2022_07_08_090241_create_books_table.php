@@ -17,6 +17,7 @@ return new class extends Migration
             $table->id();
             $table->string('title');
             $table->text('descr')->nullable();
+            $table->unique('title');
         });
     }
 

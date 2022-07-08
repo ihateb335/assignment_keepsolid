@@ -14,5 +14,12 @@
 */
 
 $router->get('/', function () use ($router) {
-    return /*$router->app->version();*/ "Hello World";
+    return "Test";
 });
+
+$router->post('/users/{id}/add_to_favorite', 'UsersController@add_fav_book');
+$router->post('/users/{id}/remove_from_favorite', 'UsersController@rem_fav_book');
+
+$router->post('/books/add', 'BooksController@add_book');
+$router->delete('/books/drop', 'BooksController@drop_book');
+$router->get('/books[/{id}]', 'BooksController@get_books');
