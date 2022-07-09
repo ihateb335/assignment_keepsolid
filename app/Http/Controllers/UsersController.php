@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use App\Models\Users;
 use App\Models\Books;
 use App\Models\Bookshelf;
+use Exception;
 use Illuminate\Support\Facades\Hash;
 
 class UsersController extends Controller
@@ -32,14 +33,25 @@ class UsersController extends Controller
         $user = new Users();
         $user->login = $request->login;
         $user->password = Hash::make($request->password);
-        if($user->save()){
+        try{ if($user->save()){
+                $response = response()->json(
+                    [
+                        'response' => [
+                            'created' => true,
+                            'userId' => $user->id
+                        ]
+                    ], 201
+                );
+            }
+        }
+        catch(Exception $e){
             $response = response()->json(
                 [
                     'response' => [
-                        'created' => true,
-                        'userId' => $user->id
+                        'created' => false,
+                        'error' => $e->getMessage()
                     ]
-                ], 201
+                ], 409
             );
         }
         return $response;
@@ -50,7 +62,7 @@ class UsersController extends Controller
     {
         $response = $this->validate(
             $request, [
-                'id' => 'required'
+                'id' => 'required|unique:bookshelf,book_id,null,user_id'
             ]
         );
 
@@ -82,15 +94,26 @@ class UsersController extends Controller
         $bookshelf = new Bookshelf;
         $bookshelf->user_id = $id;
         $bookshelf->book_id = $book_id;
-
-        if($bookshelf->save()){
+        try{
+            if($bookshelf->save()){
+                $response = response()->json(
+                    [
+                        'response' => [
+                            'created' => true,
+                            'BookshelfId' => $bookshelf->id
+                        ]
+                    ], 201
+                );
+            }
+        }
+        catch(Exception $e){
             $response = response()->json(
                 [
                     'response' => [
-                        'created' => true,
-                        'BookshelfId' => $bookshelf->id
+                        'created' => false,
+                        'error' => $e->getMessage()
                     ]
-                ], 201
+                ], 409
             );
         }
         return $response;

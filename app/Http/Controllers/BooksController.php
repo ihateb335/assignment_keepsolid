@@ -5,6 +5,7 @@ use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Http\Request;
 use App\Models\Books;
+use Exception;
 use Illuminate\Support\Facades\Hash;
 
 class BooksController extends Controller
@@ -56,14 +57,26 @@ class BooksController extends Controller
         $book = new Books();
         $book->title = $request->title;
         $book->descr= $request->descr;
-        if($book->save()){
+        try{
+            if($book->save()){
+                $response = response()->json(
+                    [
+                        'response' => [
+                            'created' => true,
+                            'bookId' => $book->id
+                        ]
+                    ], 201
+                );
+            }
+        }
+        catch(Exception $e){
             $response = response()->json(
                 [
                     'response' => [
-                        'created' => true,
-                        'bookId' => $book->id
+                        'created' => false,
+                        'error' => $e->getMessage()
                     ]
-                ], 201
+                ], 409
             );
         }
 
