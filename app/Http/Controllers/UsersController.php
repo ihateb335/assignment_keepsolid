@@ -22,62 +22,122 @@ class UsersController extends Controller
     }
 
     public function registry(Request $request){
-        if(is_null($request->login) ){
-            return "Specify login";
-        }
-        if(is_null($request->password) ){
-            return "Specify password";
-        }
+        $response = $this->validate(
+            $request, [
+                'login' => 'required|email|unique:users',
+                'password' => 'required'
+            ]
+        );
 
-        $user = new Users;
+        $user = new Users();
         $user->login = $request->login;
         $user->password = Hash::make($request->password);
-        $user->save();
-        return "User created";
+        if($user->save()){
+            $response = response()->json(
+                [
+                    'response' => [
+                        'created' => true,
+                        'userId' => $user->id
+                    ]
+                ], 201
+            );
+        }
+        return $response;
 
     }
 
-    public function add_fav_book($id, Request $request)
+    public function add_fav_book(int $id, Request $request)
     {
+        $response = $this->validate(
+            $request, [
+                'id' => 'required'
+            ]
+        );
+
         $book_id = $request->input('id');
-        if(is_null($id)){
-            return "User Id is not set";
-        }
-        if(is_null($book_id)){
-            return "Book Id is not set";
-        }
+
         if(Users::where('id',$id)->count() == 0){
-            return "There is no user with id = " . $id;
+            $response = response()->json(
+                [
+                    'response' => [
+                        'created' => false,
+                        'error' => 'There is no user with id ' . $id
+                    ]
+                ], 404
+            );
+            return $response;
         }
         if(Books::where('id',$book_id)->count() == 0){
-            return "There are no books with id = " . $book_id;
+            $response = response()->json(
+                [
+                    'response' => [
+                        'created' => false,
+                        'error' => 'There is no book with id ' . $id
+                    ]
+                ], 404
+            );
+            return $response;
         }
 
         $bookshelf = new Bookshelf;
         $bookshelf->user_id = $id;
         $bookshelf->book_id = $book_id;
-        $bookshelf->save();
-        return "Book added to favorites";
+
+        if($bookshelf->save()){
+            $response = response()->json(
+                [
+                    'response' => [
+                        'created' => true,
+                        'BookshelfId' => $bookshelf->id
+                    ]
+                ], 201
+            );
+        }
+        return $response;
     }
 
-    public function rem_fav_book($id, Request $request)
+    public function rem_fav_book(int $id, Request $request)
     {
+        $response = $this->validate(
+            $request, [
+                'id' => 'required'
+            ]
+        );
         $book_id = $request->input('id');
-        if(is_null($id)){
-            return "User Id is not set";
-        }
-        if(is_null($book_id)){
-            return "Book Id is not set";
-        }
+       
         if(Users::where('id',$id)->count() == 0){
-            return "There is no user with id = " . $id;
+            $response = response()->json(
+                [
+                    'response' => [
+                        'deleted' => false,
+                        'error' => 'There is no user with id ' . $id
+                    ]
+                ], 404
+            );
+            return $response;
         }
         if(Bookshelf::where('book_id',$book_id)->where('user_id', $id)->count() == 0){
-            return "There are no books in user's bookshelf with id = " . $book_id;
+            $response = response()->json(
+                [
+                    'response' => [
+                        'deleted' => false,
+                        'error' => "There are no books in user's bookshelf with id = " . $book_id
+                    ]
+                ], 404
+            );
+            return $response;
         }
 
         Bookshelf::where('book_id',$book_id)->where('user_id', $id)->delete();
-        return "Book removed from favorite";
+        $response = response()->json(
+            [
+                'response' => [
+                    'deleted' => true,
+                    'message' => 'Book on a bookshelf removed sucessfully'
+                ]
+            ], 204
+        );
+        return $response;
     }
 
 }

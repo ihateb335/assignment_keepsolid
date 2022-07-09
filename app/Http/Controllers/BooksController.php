@@ -21,22 +21,58 @@ class BooksController extends Controller
 
     public function drop_book(int $id)
     {
-        return DB::table('books')->delete($id);
+        if(Books::where('id', $id)->count() == 0){
+            $response = response()->json(
+                [
+                    'response' => [
+                        'deleted' => false,
+                        'error' => 'There is no books with id = ' . $id
+                    ]
+                ], 404
+            );
+            return $response;
+        }
+
+        DB::table('books')->delete($id);
+        $response = response()->json(
+            [
+                'response' => [
+                    'deleted' => true,
+                    'message' => 'Book removed sucessfully'
+                ]
+            ], 204
+        );
+        return $response;
     }
 
     public function add_book(Request $request)
     {
-        $book = [
-            'title' => $request->input('title'),
-            'descr' => $request->input('descr')
-        ];
-        DB::insert('insert into books(title,descr) values (:title, :descr)', $book);
-        return $book;
+        $response = $this->validate(
+            $request, [
+                'title' => 'required|unique:books'
+            ]
+        );
+
+        $book = new Books();
+        $book->title = $request->title;
+        $book->descr= $request->descr;
+        if($book->save()){
+            $response = response()->json(
+                [
+                    'response' => [
+                        'created' => true,
+                        'bookId' => $book->id
+                    ]
+                ], 201
+            );
+        }
+
+        return $response;
     }
 
     public function get_books(int $id = null)
     {
-        if(is_null($id) || !is_int($id)){
+        if(is_null($id)){
             $users = DB::select('select * from books');
         }
         else{
@@ -48,7 +84,8 @@ class BooksController extends Controller
     public function CSV()
     {
         $file_name = uniqid() . '_books.csv';
-        $file = fopen($file_name, 'wa');   
+        $file = fopen($file_name, 'wa');
+          
         foreach (Books::get() as $book) {
             fputcsv($file, [$book->id, $book->title, $book->descr ], separator: ';');
         }
