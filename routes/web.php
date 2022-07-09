@@ -29,7 +29,7 @@ $router->get('/books[/{id:[0-9]+}]', 'BooksController@get_books');
 
 $router->group(['prefix' => 'books/'], function () use ($router) {
     $router->post('add', 'BooksController@add_book');
-    $router->get('download', 'BooksController@CSV');
+    $router->get('download[/{method}]', 'BooksController@CSV');
     $router->delete('/{id:[0-9]+}/drop', 'BooksController@drop_book');
 });
 
