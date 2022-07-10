@@ -19,9 +19,11 @@ $router->get('/', function () use ($router) {
 
 $router->group(['prefix' => 'users/'], function () use ($router) {
     $router->post('registry', 'UsersController@registry');
-    $router->group(['prefix' => '{id:[0-9]+}/'], function () use ($router) {
+    $router->post('login', 'UsersController@login');
+    $router->group(['prefix' => '{id:[0-9]+}/', 'middleware' => 'auth'], function () use ($router) {
         $router->post('add_to_favorite', 'UsersController@add_fav_book');
         $router->delete('remove_from_favorite', 'UsersController@rem_fav_book');
+        $router->get('test','UsersController@test' );
     });
 });
 

@@ -20,8 +20,7 @@ class BooksController extends Controller
         //
     }
 
-    public function drop_book(int $id)
-    {
+    public function drop_book(int $id) {
         if(Books::where('id', $id)->count() == 0){
             $response = response()->json(
                 [
@@ -46,8 +45,7 @@ class BooksController extends Controller
         return $response;
     }
 
-    public function add_book(Request $request)
-    {
+    public function add_book(Request $request) {
         $response = $this->validate(
             $request, [
                 'title' => 'required|unique:books'
@@ -83,8 +81,7 @@ class BooksController extends Controller
         return $response;
     }
 
-    public function get_books(int $id = null)
-    {
+    public function get_books(int $id = null) {
         if(is_null($id)){
             $users = DB::select('select * from books');
         }
@@ -94,12 +91,11 @@ class BooksController extends Controller
         return $users;
     }
 
-    function CSV_Basic(){
+    function CSV_Basic() {
         return Books::get()->toArray();
     }
 
-    function CSV_Authors()
-    {
+    function CSV_Authors() {
         return DB::table('books as b')
         ->leftJoin('authors_books as ab','b.id','=','ab.book_id')
         ->leftJoin('authors as a','a.id','=','ab.author_id')
@@ -110,8 +106,7 @@ class BooksController extends Controller
 
     }
 
-    function CSV_Genres()
-    {
+    function CSV_Genres() {
         return DB::table('books as b')
         ->leftJoin('genres_books as gb','b.id','=','gb.book_id')
         ->leftJoin('genres as g','g.id','=','gb.genre_id')
@@ -121,7 +116,7 @@ class BooksController extends Controller
         ;
     }
 
-    function CSV_All(){
+    function CSV_All() {
         return DB::table('books as b')
         ->leftJoin('genres_books as gb','b.id','=','gb.book_id')
         ->leftJoin('genres as g','g.id','=','gb.genre_id')
@@ -134,8 +129,7 @@ class BooksController extends Controller
         ;
     }
 
-    public function CSV(Request $request, $method = '')
-    {
+    public function CSV(Request $request, $method = ''){
         $sep = $request->input('sep', ';');
 
         $file_name = uniqid() . '_books.csv';

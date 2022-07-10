@@ -1,14 +1,22 @@
 <?php
 
 namespace App\Http\Controllers;
+
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Cookie;
+
+
 use Illuminate\Http\Request;
+
+use Illuminate\Support\Str;
+
 use App\Models\Users;
 use App\Models\Books;
 use App\Models\Bookshelf;
+
 use Exception;
-use Illuminate\Support\Facades\Hash;
 
 class UsersController extends Controller
 {
@@ -20,6 +28,43 @@ class UsersController extends Controller
     public function __construct()
     {
         //
+    }
+    public function test(Request $request)
+    {
+        $config = config()->all();
+        echo json_encode($config['database']);
+    }
+
+    public function login(Request $request)
+    {
+        $this->validate($request, [
+
+            'login' => 'required',
+
+            'password' => 'required'
+
+        ]);
+               
+        $user = Users::where('login', $request->login)->first();
+        if(Hash::check($request->password, $user->password)){
+            
+            setcookie('login',  $request->login, time() + (86400 * 10), "/");
+            setcookie('password', $user->password, time() + (86400 * 10), "/");
+            setcookie('token', $user->token, time() + (86400 * 10), "/");
+            
+            return response()->json(['status' => 'success']);
+  
+          }
+          else{
+              return response()->json(['status' => 'fail'],401);
+          }
+        try{
+            
+        }
+        catch(Exception $e){
+            return response()->json(['status' => 'fail'],401);
+        }
+        
     }
 
     public function registry(Request $request){
@@ -33,6 +78,7 @@ class UsersController extends Controller
         $user = new Users();
         $user->login = $request->login;
         $user->password = Hash::make($request->password);
+        $user->token = base64_encode(STr::random('45'));
         try{ if($user->save()){
                 $response = response()->json(
                     [
