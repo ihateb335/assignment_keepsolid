@@ -8,7 +8,6 @@ use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Auth;
 
-use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rule;
 
 use Illuminate\Http\Request;
@@ -32,7 +31,7 @@ class UsersController extends Controller
         //
     }
 
-    public function logout(Request $request) {
+    public function logout() {
         CookieProvider::SetCookie(
             [
              'token' => null
@@ -57,7 +56,7 @@ class UsersController extends Controller
             $this->logout($request);
             CookieProvider::SetCookie(
                [
-                'token' => hash('sha256',$user->token) 
+                'token' => hash('sha256',$user->id . $user->password . $user->login ) 
                ]  
             );
 
@@ -81,7 +80,6 @@ class UsersController extends Controller
         $user = new Users();
         $user->login = $request->login;
         $user->password = Hash::make($request->password);
-        $user->token = base64_encode(STr::random('45'));
         try{ if($user->save()){
                 $response = response()->json(
                     [
@@ -240,5 +238,7 @@ class UsersController extends Controller
         );
         return $response;
     }
+
+   
 
 }
