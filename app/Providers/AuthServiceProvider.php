@@ -3,7 +3,7 @@
 namespace App\Providers;
 
 use App\Models\Users;
-use Illuminate\Support\Facades\Gate;
+use App\Services\Auth\JwtGuard;
 use Illuminate\Support\ServiceProvider;
 
 class AuthServiceProvider extends ServiceProvider
@@ -25,6 +25,7 @@ class AuthServiceProvider extends ServiceProvider
      */
     public function boot()
     {
+
         // Here you may define how you wish users to be authenticated for your Lumen
         // application. The callback which receives the incoming request instance
         // should return either a User instance or null. You're free to obtain
@@ -35,5 +36,9 @@ class AuthServiceProvider extends ServiceProvider
                 return Users::where('token', $request->cookie('token'))->first();
             }
         });
+
+
+
+      
     }
 }

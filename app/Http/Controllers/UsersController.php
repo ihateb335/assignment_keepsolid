@@ -2,16 +2,18 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Controllers\Controller;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Facades\Cookie;
+use App\Providers\CookieProvider;
 
+use App\Http\Controllers\Controller;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Auth;
+
+use Illuminate\Support\Facades\Validator;
+use Illuminate\Validation\Rule;
 
 use Illuminate\Http\Request;
 
 use Illuminate\Support\Str;
-
 use App\Models\Users;
 use App\Models\Books;
 use App\Models\Bookshelf;
@@ -29,10 +31,23 @@ class UsersController extends Controller
     {
         //
     }
-    public function test(Request $request)
-    {
-        $config = config()->all();
-        echo json_encode($config['database']);
+/*     public function test(Request $request)
+    {   if($request->input == 1){
+        Config::set('database.connections.guest.username','ELO_Admin');
+        Config::set('database.connections.guest.password','111');
+        }      
+
+        echo $this->cookie_connect()->table('bookshelf')->get();
+    } */
+
+    public function logout() {
+        CookieProvider::SetCookie(
+            [
+             'token' => null
+            ],
+            true  
+         );
+        return response()->json(['quit' => 'success']);
     }
 
     public function login(Request $request)
@@ -44,27 +59,35 @@ class UsersController extends Controller
             'password' => 'required'
 
         ]);
-               
+        $credentials = $request->only(['login', 'password']);   
+      /*  if(! Auth::attempt( $credentials) ){
+            $user = Users::where('login', $request->login)->first();
+            $this->logout();
+            CookieProvider::SetCookie(
+                [
+                 'token' => $user->token
+                ]  
+             );
+ 
+             return response()->json(['status' => 'success']);
+       } */
+        
         $user = Users::where('login', $request->login)->first();
         if(Hash::check($request->password, $user->password)){
-            
-            setcookie('login',  $request->login, time() + (86400 * 10), "/");
-            setcookie('password', $user->password, time() + (86400 * 10), "/");
-            setcookie('token', $user->token, time() + (86400 * 10), "/");
-            
+            $this->logout();
+            CookieProvider::SetCookie(
+               [
+                'token' => $user->token
+               ]  
+            );
+
             return response()->json(['status' => 'success']);
   
           }
           else{
               return response()->json(['status' => 'fail'],401);
           }
-        try{
-            
-        }
-        catch(Exception $e){
-            return response()->json(['status' => 'fail'],401);
-        }
-        
+
     }
 
     public function registry(Request $request){
@@ -106,15 +129,31 @@ class UsersController extends Controller
 
     public function add_fav_book(int $id, Request $request)
     {
+        if($id != Auth::id()){
+            $response = response()->json(
+                [
+                    'response' => [
+                        'created' => false,
+                        'error' => "You cannot edit another's user bookshelf"
+                    ]
+                ], 403
+            );
+            return $response;
+        }
+
+        $book_id = $request->book_id;
+
         $response = $this->validate(
             $request, [
-                'id' => 'required|unique:bookshelf,book_id,null,user_id'
+                'book_id' => ['required', RULE::unique('bookshelf','book_id')->where(function ($query) use($id,$book_id) {
+                    return $query->where('book_id', $book_id)
+                    ->where('user_id', $id);
+                })]
             ]
         );
 
-        $book_id = $request->input('id');
-
-        if(Users::where('id',$id)->count() == 0){
+      
+        if(Users::where('id', $id)->count() == 0){
             $response = response()->json(
                 [
                     'response' => [
@@ -125,7 +164,8 @@ class UsersController extends Controller
             );
             return $response;
         }
-        if(Books::where('id',$book_id)->count() == 0){
+
+        if(Books::where('id', $book_id)->count() == 0){
             $response = response()->json(
                 [
                     'response' => [
@@ -167,12 +207,24 @@ class UsersController extends Controller
 
     public function rem_fav_book(int $id, Request $request)
     {
+        if($id != Auth::id()){
+            $response = response()->json(
+                [
+                    'response' => [
+                        'created' => false,
+                        'error' => "You cannot edit another's user bookshelf"
+                    ]
+                ], 403
+            );
+            return $response;
+        }
+
         $response = $this->validate(
             $request, [
-                'id' => 'required'
+                'book_id' => 'required'
             ]
         );
-        $book_id = $request->input('id');
+        $book_id = $request->book_id;
        
         if(Users::where('id',$id)->count() == 0){
             $response = response()->json(

@@ -15,7 +15,7 @@ namespace App\Console\Commands;
 use Exception;
 use Illuminate\Console\Command;
 
-
+use Illuminate\Support\Facades\DB;
 
 /**
  * Class deletePostsCommand
@@ -25,19 +25,25 @@ use Illuminate\Console\Command;
  */
 class SetRoleCommand extends Command
 {
+
+    public $current_roles = [
+        'user',
+        'admin'
+    ];
+
     /**
      * The console command name.
      *
      * @var string
      */
-    protected $signature = "delete:posts";
+    protected $signature = "setrole {user : Id of a user} {--R|role=user : Role of a user}";
 
     /**
      * The console command description.
      *
      * @var string
      */
-    protected $description = "Delete all posts";
+    protected $description = "Set role of a user";
 
 
     /**
@@ -47,17 +53,20 @@ class SetRoleCommand extends Command
      */
     public function handle()
     {
+        $id = intval( $this->argument('user') );
+        $role = strtolower( $this->option('role') );
+        if(!is_int($id)) {
+            $this->error("Id of a user must be int");
+            return;
+        }
+        if(!in_array($role, $this->current_roles)){
+            $this->error("Role of a user must be user or admin");
+            return;
+        }
+
         try {
-            $posts = Post::getPosts();
-           
-            if (!$posts) {
-            $this->info("No posts exist");
-                return;
-            }
-            foreach ($posts as $post) {
-                $post->delete();
-            }
-            $this->info("All posts have been deleted");
+            DB::connection('admin')->table('users')->where('id', $id)->update(['role'=> $role ]);
+            $this->info("Changed user's $id role to $role ");
         } catch (Exception $e) {
             $this->error("An error occurred");
         }

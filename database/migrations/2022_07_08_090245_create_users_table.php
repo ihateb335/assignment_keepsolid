@@ -17,6 +17,7 @@ return new class extends Migration
             $table->id();
             $table->text('login');
             $table->text('password');
+            $table->text('role')->default('user');
             $table->text('token')->nullable();
             $table->unique('login');
         });
