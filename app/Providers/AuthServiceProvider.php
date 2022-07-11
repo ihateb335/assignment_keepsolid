@@ -33,7 +33,7 @@ class AuthServiceProvider extends ServiceProvider
 
         $this->app['auth']->viaRequest('api', function ($request) {
             if ($request->cookie('token')) {
-                return Users::where('token', $request->cookie('token'))->first();
+                return Users::whereRaw('sha256(token::bytea)::text = \'\x'. $request->cookie('token') . '\'')->first();
             }
         });
 

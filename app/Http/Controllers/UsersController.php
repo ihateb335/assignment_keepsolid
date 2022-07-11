@@ -31,16 +31,8 @@ class UsersController extends Controller
     {
         //
     }
-/*     public function test(Request $request)
-    {   if($request->input == 1){
-        Config::set('database.connections.guest.username','ELO_Admin');
-        Config::set('database.connections.guest.password','111');
-        }      
 
-        echo $this->cookie_connect()->table('bookshelf')->get();
-    } */
-
-    public function logout() {
+    public function logout(Request $request) {
         CookieProvider::SetCookie(
             [
              'token' => null
@@ -59,25 +51,13 @@ class UsersController extends Controller
             'password' => 'required'
 
         ]);
-        $credentials = $request->only(['login', 'password']);   
-      /*  if(! Auth::attempt( $credentials) ){
-            $user = Users::where('login', $request->login)->first();
-            $this->logout();
-            CookieProvider::SetCookie(
-                [
-                 'token' => $user->token
-                ]  
-             );
- 
-             return response()->json(['status' => 'success']);
-       } */
-        
+       
         $user = Users::where('login', $request->login)->first();
         if(Hash::check($request->password, $user->password)){
-            $this->logout();
+            $this->logout($request);
             CookieProvider::SetCookie(
                [
-                'token' => $user->token
+                'token' => hash('sha256',$user->token) 
                ]  
             );
 
