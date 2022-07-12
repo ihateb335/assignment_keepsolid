@@ -29,6 +29,16 @@ return new class extends Migration
         DB::statement('
         GRANT ALL ON users, bookshelf, books, authors, genres, authors_books, genres_books to "ELO_Admin";
         ');
+
+        DB::statement('
+        GRANT USAGE, SELECT ON ALL SEQUENCES IN SCHEMA public TO "ELO_Guest";
+        ');
+        DB::statement('
+        GRANT USAGE, SELECT ON ALL SEQUENCES IN SCHEMA public TO "ELO_User";
+        ');
+        DB::statement('
+        GRANT USAGE, SELECT ON ALL SEQUENCES IN SCHEMA public TO "ELO_Admin";
+        ');
     }
 
     /**

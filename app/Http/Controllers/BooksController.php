@@ -13,6 +13,7 @@ use Exception;
 use Illuminate\Support\Facades\Hash;
 
 use Illuminate\Validation\Rule;
+use PHPUnit\Framework\Constraint\Callback;
 
 class BooksController extends Controller
 {
@@ -26,6 +27,9 @@ class BooksController extends Controller
         //
     }
 
+     /**
+     * @param int $id Id of Book
+     */
     public function get_books(int $id = null) {
         if(is_null($id)){
             $users = Books::get();
@@ -35,7 +39,9 @@ class BooksController extends Controller
         }
         return $users;
     }
-
+     /**
+     * @param int $id Id of Genre
+     */
     public function get_genres(int $id = null) {
         if(is_null($id)){
             $users = Genres::get();
@@ -45,7 +51,9 @@ class BooksController extends Controller
         }
         return $users;
     }
-
+     /**
+     * @param int $id Id of Author
+     */
     public function get_authors(int $id = null) {
         if(is_null($id)){
             $users = Authors::get();
@@ -56,6 +64,9 @@ class BooksController extends Controller
         return $users;
     }
 
+    /**
+     * @param int $id Id of Author to drop
+     */
     public function drop_author(int $id) {
         if(Authors::where('id', $id)->count() == 0){
             $response = response()->json(
@@ -120,6 +131,9 @@ class BooksController extends Controller
         return $response;
     }
 
+    /**
+     * @param int $id Id of Genre to drop
+     */
     public function drop_genre(int $id) {
         if(Genres::where('id', $id)->count() == 0){
             $response = response()->json(
@@ -181,6 +195,9 @@ class BooksController extends Controller
         return $response;
     }
 
+    /**
+     * @param int $id Id of Book to drop
+     */
     public function drop_book(int $id) {
         if(Books::where('id', $id)->count() == 0){
             $response = response()->json(
@@ -242,10 +259,17 @@ class BooksController extends Controller
         return $response;
     }
 
+    /**
+     * Returns all book columns for csv file
+     * @return [] 
+     */
     function CSV_Basic() {
         return Books::get()->toArray();
     }
-
+    /**
+     * Returns all book columns with all authors of a book for csv file
+     * @return [] 
+     */
     function CSV_Authors() {
         return DB::table('books as b')
         ->leftJoin('authors_books as ab','b.id','=','ab.book_id')
@@ -257,6 +281,10 @@ class BooksController extends Controller
 
     }
 
+    /**
+     * Returns all book columns with all genres of a book for csv file
+     * @return [] 
+     */
     function CSV_Genres() {
         return DB::table('books as b')
         ->leftJoin('genres_books as gb','b.id','=','gb.book_id')
@@ -267,6 +295,10 @@ class BooksController extends Controller
         ;
     }
 
+    /**
+     * Returns all book columns with all authors and genres of a book for csv file
+     * @return [] 
+     */
     function CSV_All() {
         return DB::table('books as b')
         ->leftJoin('genres_books as gb','b.id','=','gb.book_id')
@@ -280,7 +312,11 @@ class BooksController extends Controller
         ;
     }
 
-    public function CSV(Request $request, $method = ''){
+     /**
+     * Returns response with csv file in it
+     * @param string $method Method, to generate output for csv file
+     */
+    public function CSV(Request $request, string $method = ''){
         $sep = $request->input('sep', ';');
 
         $file_name = uniqid() . '_books.csv';
@@ -335,7 +371,9 @@ class BooksController extends Controller
         unlink($file_name);
     }
     
-
+    /**
+     * @param int $id Id of Book to drop
+     */
     public function add_author_to_book(int $id, Request $request)
     {
         $book_id = $id;
@@ -403,6 +441,9 @@ class BooksController extends Controller
         }
         return $response;
     }
+    /**
+     * @param int $id Id of Book to drop
+     */
     public function add_genre_to_book(int $id, Request $request)
     {
         $book_id = $id;
@@ -471,6 +512,9 @@ class BooksController extends Controller
         return $response;
     }
 
+    /**
+     * @param int $id Id of Book to drop
+     */
     public function remove_author_from_book(int $id, Request $request)
     {
         $response = $this->validate(
@@ -504,6 +548,9 @@ class BooksController extends Controller
         );
         return $response;
     }
+    /**
+     * @param int $id Id of Book to drop
+     */
     public function remove_genre_from_book(int $id, Request $request)
     {
         $response = $this->validate(

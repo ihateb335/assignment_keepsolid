@@ -31,14 +31,18 @@ class UsersController extends Controller
         //
     }
 
-    public function logout() {
-        CookieProvider::SetCookie(
-            [
-             'token' => null
-            ],
-            true  
-         );
-        return response()->json(['quit' => 'success']);
+    public function logout(Request $request) {
+        if ($request->cookie('token')) {
+            CookieProvider::SetCookie(
+                [
+                 'token' => null
+                ],
+                true  
+             );
+            return response()->json(['quit' => 'success']);
+        }
+        return  response()->json(['quit' => 'no session'],404);
+        
     }
 
     public function login(Request $request)
@@ -105,6 +109,9 @@ class UsersController extends Controller
 
     }
 
+    /**
+     * @param int $id Id of User
+     */
     public function add_fav_book(int $id, Request $request)
     {
         if($id != Auth::id()){
@@ -123,25 +130,12 @@ class UsersController extends Controller
 
         $response = $this->validate(
             $request, [
-                'book_id' => ['required', RULE::unique('bookshelf','book_id')->where(function ($query) use($id,$book_id) {
+                'book_id' => ['required', RULE::unique('user.bookshelf','book_id')->where(function ($query) use($id,$book_id) {
                     return $query->where('book_id', $book_id)
                     ->where('user_id', $id);
                 })]
             ]
         );
-
-      
-        if(Users::where('id', $id)->count() == 0){
-            $response = response()->json(
-                [
-                    'response' => [
-                        'created' => false,
-                        'error' => 'There is no user with id ' . $id
-                    ]
-                ], 404
-            );
-            return $response;
-        }
 
         if(Books::where('id', $book_id)->count() == 0){
             $response = response()->json(
@@ -182,7 +176,9 @@ class UsersController extends Controller
         }
         return $response;
     }
-
+    /**
+     * @param int $id Id of User
+     */
     public function rem_fav_book(int $id, Request $request)
     {
         if($id != Auth::id()){
@@ -204,17 +200,6 @@ class UsersController extends Controller
         );
         $book_id = $request->book_id;
        
-        if(Users::where('id',$id)->count() == 0){
-            $response = response()->json(
-                [
-                    'response' => [
-                        'deleted' => false,
-                        'error' => 'There is no user with id ' . $id
-                    ]
-                ], 404
-            );
-            return $response;
-        }
         if(Bookshelf::where('book_id',$book_id)->where('user_id', $id)->count() == 0){
             $response = response()->json(
                 [
