@@ -30,14 +30,19 @@ class BooksController extends Controller
      /**
      * @param int $id Id of Book
      */
-    public function get_books(int $id = null) {
-        if(is_null($id)){
-            $users = Books::get();
+    public function get_books(int $id = null, string $method = 'basic') {
+        switch ($method) {
+            case 'basic':
+                return $this->CSV_Basic($id);
+            case 'authors':
+                return $this->CSV_Authors($id);
+            case 'genres':
+                return $this->CSV_Genres($id);
+            case 'all':
+                return $this->CSV_All($id);             
+            default:
+                return $this->CSV_Basic($id);
         }
-        else{
-            $users = Books::where('id',$id)->get();
-        }
-        return $users;
     }
      /**
      * @param int $id Id of Genre
@@ -263,34 +268,56 @@ class BooksController extends Controller
      * Returns all book columns for csv file
      * @return [] 
      */
-    function CSV_Basic() {
-        return Books::get()->toArray();
+    function CSV_Basic(int $id = null) {
+        if(is_null($id)){
+            return Books::get()->toArray();
+        }
+        return Books::where('id',$id)->get()->toArray();
     }
     /**
      * Returns all book columns with all authors of a book for csv file
      * @return [] 
      */
-    function CSV_Authors() {
-        return DB::table('books as b')
+    function CSV_Authors(int $id = null) {
+        if(is_null($id)){
+            return DB::table('books as b')
         ->leftJoin('authors_books as ab','b.id','=','ab.book_id')
         ->leftJoin('authors as a','a.id','=','ab.author_id')
         ->select('b.id as book_id','b.title','b.descr', 
         'a.id as author_id', 'a.first_name', 'a.last_name', 'a.descr as author_descr')
         ->get()
         ;
-
+        }
+        return DB::table('books as b')
+        ->leftJoin('authors_books as ab','b.id','=','ab.book_id')
+        ->leftJoin('authors as a','a.id','=','ab.author_id')
+        ->select('b.id as book_id','b.title','b.descr', 
+        'a.id as author_id', 'a.first_name', 'a.last_name', 'a.descr as author_descr')
+        ->where('b.id',$id)
+        ->get()
+        ;      
     }
 
     /**
      * Returns all book columns with all genres of a book for csv file
      * @return [] 
      */
-    function CSV_Genres() {
+    function CSV_Genres(int $id = null) {
+        if(is_null($id)){
+            return DB::table('books as b')
+        ->leftJoin('genres_books as gb','b.id','=','gb.book_id')
+        ->leftJoin('genres as g','g.id','=','gb.genre_id')
+        ->select('b.id as book_id','b.title','b.descr',
+         'g.id as genre_id', 'g.title as genre_title', 'g.descr as genre_descr')
+        ->get()
+        ;
+        }
         return DB::table('books as b')
         ->leftJoin('genres_books as gb','b.id','=','gb.book_id')
         ->leftJoin('genres as g','g.id','=','gb.genre_id')
         ->select('b.id as book_id','b.title','b.descr',
          'g.id as genre_id', 'g.title as genre_title', 'g.descr as genre_descr')
+        ->where('b.id',$id)
         ->get()
         ;
     }
@@ -299,17 +326,31 @@ class BooksController extends Controller
      * Returns all book columns with all authors and genres of a book for csv file
      * @return [] 
      */
-    function CSV_All() {
+    function CSV_All(int $id = null) {
+        if(is_null($id)){
+            return DB::table('books as b')
+            ->leftJoin('genres_books as gb','b.id','=','gb.book_id')
+            ->leftJoin('genres as g','g.id','=','gb.genre_id')
+            ->leftJoin('authors_books as ab','b.id','=','ab.book_id')
+            ->leftJoin('authors as a','a.id','=','ab.author_id')
+            ->select('b.id as book_id','b.title','b.descr',
+             'a.id as author_id', 'a.first_name', 'a.last_name', 'a.descr as author_descr',
+              'g.id as genre_id', 'g.title as genre_title', 'g.descr as genre_descr')
+            ->get()
+            ;
+        }
         return DB::table('books as b')
-        ->leftJoin('genres_books as gb','b.id','=','gb.book_id')
-        ->leftJoin('genres as g','g.id','=','gb.genre_id')
-        ->leftJoin('authors_books as ab','b.id','=','ab.book_id')
-        ->leftJoin('authors as a','a.id','=','ab.author_id')
-        ->select('b.id as book_id','b.title','b.descr',
-         'a.id as author_id', 'a.first_name', 'a.last_name', 'a.descr as author_descr',
-          'g.id as genre_id', 'g.title as genre_title', 'g.descr as genre_descr')
-        ->get()
-        ;
+            ->leftJoin('genres_books as gb','b.id','=','gb.book_id')
+            ->leftJoin('genres as g','g.id','=','gb.genre_id')
+            ->leftJoin('authors_books as ab','b.id','=','ab.book_id')
+            ->leftJoin('authors as a','a.id','=','ab.author_id')
+            ->select('b.id as book_id','b.title','b.descr',
+             'a.id as author_id', 'a.first_name', 'a.last_name', 'a.descr as author_descr',
+              'g.id as genre_id', 'g.title as genre_title', 'g.descr as genre_descr')
+            ->where('b.id',$id)
+            ->get()
+            ;
+       
     }
 
      /**

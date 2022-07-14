@@ -26,14 +26,18 @@ $router->group(['prefix' => 'users/'], function () use ($router) {
     });
 });
 
-$router->get('/books[/{id:[0-9]+}]', 'BooksController@get_books');
-$router->get('/genres[/{id:[0-9]+}]', 'BooksController@get_genres');
-$router->get('/authors[/{id:[0-9]+}]', 'BooksController@get_authors');
+$router->get('/books/get/{method:[a-z]+}[/{id:[0-9]+}]', 'BooksController@get_books');
+$router->get('/books/get[/{id:[0-9]+}]', 'BooksController@get_books');
+
+$router->get('/genres/get[/{id:[0-9]+}]', 'BooksController@get_genres');
+$router->get('/authors/get[/{id:[0-9]+}]', 'BooksController@get_authors');
+
+
 
 $router->group(['prefix' => 'books/', 'middleware' => 'auth:admin'], function () use ($router) {
     $router->post('add', 'BooksController@add_book');
-    $router->get('download[/{method}]', 'BooksController@CSV');
     $router->delete('/drop/{id:[0-9]+}', 'BooksController@drop_book');
+    $router->get('download[/{method}]', 'BooksController@CSV');
 
     $router->post('/add_genre/{id:[0-9]+}', 'BooksController@add_genre_to_book');
     $router->post('/add_author/{id:[0-9]+}', 'BooksController@add_author_to_book');
