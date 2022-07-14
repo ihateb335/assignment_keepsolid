@@ -116,12 +116,9 @@ class UsersController extends Controller
 
     }
 
-    /**
-     * @param int $id Id of User
-     */
-    public function add_fav_book(int $id, Request $request)
+    public function add_fav_book(Request $request)
     {
-        if($id != Auth::id()){
+        /* if($id != Auth::id()){
             $response = response()->json(
                 [
                     'response' => [
@@ -132,7 +129,9 @@ class UsersController extends Controller
             );
             return $response;
         }
+         */
 
+        $id = Auth::id();
         $book_id = $request->book_id;
 
         $response = $this->validate(
@@ -183,12 +182,10 @@ class UsersController extends Controller
         }
         return $response;
     }
-    /**
-     * @param int $id Id of User
-     */
-    public function rem_fav_book(int $id, Request $request)
+    
+    public function rem_fav_book(Request $request)
     {
-        if($id != Auth::id()){
+        /* if($id != Auth::id()){
             $response = response()->json(
                 [
                     'response' => [
@@ -198,13 +195,15 @@ class UsersController extends Controller
                 ], 403
             );
             return $response;
-        }
+        } */
 
         $response = $this->validate(
             $request, [
                 'book_id' => 'required'
             ]
         );
+
+        $id = Auth::id();
         $book_id = $request->book_id;
        
         if(Bookshelf::where('book_id',$book_id)->where('user_id', $id)->count() == 0){

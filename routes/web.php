@@ -21,8 +21,8 @@ $router->group(['prefix' => 'users/'], function () use ($router) {
     $router->post('logout', 'UsersController@logout');
     
     $router->group(['middleware' => 'auth'], function () use ($router) {
-        $router->post('add_to_favorite/{id:[0-9]+}', 'UsersController@add_fav_book');
-        $router->delete('remove_from_favorite/{id:[0-9]+}', 'UsersController@rem_fav_book');
+        $router->post('add_to_favorite/', 'UsersController@add_fav_book');
+        $router->delete('remove_from_favorite/', 'UsersController@rem_fav_book');
     });
 });
 
