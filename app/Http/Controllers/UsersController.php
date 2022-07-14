@@ -56,6 +56,13 @@ class UsersController extends Controller
         ]);
        
         $user = Users::where('login', $request->login)->first();
+
+        try{
+            $user->login;
+        }
+        catch(Exception $e){
+            return response()->json(['status' => 'fail','hint' => 'There is no user with this login registred']);
+        }
         if(Hash::check($request->password, $user->password)){
             $this->logout($request);
             CookieProvider::SetCookie(

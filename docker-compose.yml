@@ -1,0 +1,26 @@
+services:
+  lumen:
+    ports:
+      - "8000:8000"
+    volumes:
+      - .:/var/www/html
+      - /var/www/html/vendor/
+    build: .
+    command: php -S lumen:8000 -t public
+    restart: always
+  db:
+    image: postgres
+    restart: always
+    ports:
+      - "54320:5432"
+    environment:
+      POSTGRES_PASSWORD: 111
+  pgadmin:
+    image: dpage/pgadmin4
+    container_name: pgadmin4_container
+    restart: always
+    ports:
+      - "5050:80"
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@thing.com
+      PGADMIN_DEFAULT_PASSWORD: admin
