@@ -41,7 +41,7 @@ class Authenticate
         }
 
         if ($guard == 'admin' && $guard_ins->user()->role != 'admin' ){
-            return response('Unauthorized.', 401);
+            return response('Forbidden', 403);
         }
         
         return $next($request);
