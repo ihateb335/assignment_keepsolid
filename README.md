@@ -5,9 +5,11 @@
 
 ## Авторизация
 
-Для регистрации использовать POST запрос к /users/registry и телом запроса login='email',password='password'
-Для аутентификации использовать POST запрос к /users/login и телом запроса login='email',password='password'
-Для выхода из учётной записи использовать POST запрос к /users/logout
+Для регистрации использовать POST запрос к /users/registry и телом запроса login='email',password='password'.
+
+Для аутентификации использовать POST запрос к /users/login и телом запроса login='email',password='password'.
+
+Для выхода из учётной записи использовать POST запрос к /users/logout.
 
 ## Книги
 
@@ -91,6 +93,15 @@ Get запрос к:
 Для изменения роли пользователя используется команда:
 
 php artisan setrole -R [user/admin] [Идентификатор пользователя]
+
+## Диаграммы
+
+В каталоге /diagram представлены:
+
+-   ER Diagram базы данных
+-   Class Diagram проекта
+-   Sequence Diagram для процессов аутентификации и авторизации (Sequence Diagram)
+-   Sequence Diagram для POST, GET и DELETE запросов к библиотеке (Sequence Diagram Library)
 
 ## Обратная связь
 
